@@ -1,0 +1,32 @@
+{
+	"name": "leiga-mcp-smithery",
+	"version": "1.0.0",
+	"description": "A Model Context Protocol server for the Leiga project management platform, deployed on Smithery",
+	"main": "index.js",
+	"module": "./src/index.ts",
+	"type": "module",
+	"scripts": {
+		"dev": "npx @smithery/cli dev",
+		"build": "npx @smithery/cli build"
+	},
+	"keywords": [
+		"leiga",
+		"mcp",
+		"model context protocol",
+		"project management",
+		"smithery",
+		"api"
+	],
+	"author": "Leiga Team",
+	"license": "MIT",
+	"dependencies": {
+		"@modelcontextprotocol/sdk": "^1.17.4",
+		"zod": "^3.25.46"
+	},
+	"devDependencies": {
+		"@smithery/cli": "^1.2.4",
+		"@types/node": "^20.17.9",
+		"tsx": "^4.19.4",
+		"typescript": "^5.9.2"
+	}
+}

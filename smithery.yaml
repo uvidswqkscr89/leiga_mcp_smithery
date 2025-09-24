@@ -1,0 +1,24 @@
+runtime: typescript
+startCommand:
+  type: http
+  configSchema:
+    type: object
+    required: ["clientId", "secret"]
+    properties:
+      clientId:
+        type: string
+        title: "Leiga Client ID"
+        description: "Your Leiga API client ID for authentication"
+      secret:
+        type: string
+        title: "Leiga Secret"
+        description: "Your Leiga API secret for authentication"
+      debug:
+        type: boolean
+        title: "Debug Mode"
+        description: "Enable debug logging"
+        default: false
+  exampleConfig:
+    clientId: "your-leiga-client-id"
+    secret: "your-leiga-secret"
+    debug: false
