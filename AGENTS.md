@@ -91,6 +91,91 @@ Find all high priority bugs in the "Mobile App" project created this week
 - Date calculations for filtering
 - Providing temporal context in responses
 
+### 7. list_issue_comments
+**Purpose**: List comments for a specific issue with pagination support.
+
+**When to use**:
+- User wants to see discussion history on an issue
+- Need to understand context from previous comments
+- Following up on issue conversations
+
+**Parameters**:
+- `issueId`: Issue ID or issue number (e.g., "12345" or "PROJ-123")
+- `pageNumber`: Page number (default: 1)
+- `pageSize`: Number of comments per page (default: 10)
+
+### 8. create_comment
+**Purpose**: Create new comments or replies on issues.
+
+**When to use**:
+- User wants to add feedback or updates to an issue
+- Need to reply to existing comments
+- Documenting progress or decisions
+
+**Parameters**:
+- `issueId`: Issue ID or issue number
+- `content`: Comment text content
+- `commentId`: Optional - ID of comment to reply to (for threaded replies)
+
+### 9. get_issue_options
+**Purpose**: Get available field options for an issue (status, priority, assignee, etc.).
+
+**When to use**:
+- Before updating an issue to see valid field values
+- Understanding what options are available for issue fields
+- Validating field names before updates
+
+**Parameters**:
+- `issueId`: Issue ID or issue number
+
+### 10. update_issue
+**Purpose**: Update issue fields using human-readable field names.
+
+**When to use**:
+- User wants to change issue status, priority, assignee, etc.
+- Updating issue details like summary or description
+- Setting dates, labels, or other metadata
+
+**Parameters**:
+- `issueId`: Issue ID or issue number (required)
+- `summary`: New issue title
+- `description`: New issue description
+- `statusName`: Status name (e.g., "In Progress", "Done")
+- `priorityName`: Priority name (e.g., "High", "Medium")
+- `assigneeName`: Assignee name
+- `labels`: Array of label names
+- `follows`: Array of follower names
+- `releaseVersionName`: Release version name
+- `dueDate`: Due date (YYYY-MM-DD format)
+- `startDate`: Start date (YYYY-MM-DD format)
+
+### 11. list_project_members
+**Purpose**: List members of a specific project.
+
+**When to use**:
+- Finding team members for assignment or collaboration
+- Understanding project team composition
+- Looking up user names for assignments
+
+**Parameters**:
+- `projectId`: Project ID (required)
+- `keyword`: Search keyword for member names
+- `pageNumber`: Page number (default: 1)
+- `pageSize`: Results per page (default: 20)
+
+### 12. list_org_members
+**Purpose**: List all organization members.
+
+**When to use**:
+- Finding users across the entire organization
+- Looking up user information for assignments
+- Understanding team structure
+
+**Parameters**:
+- `key`: Search keyword for member names
+- `pageNumber`: Page number (default: 1)
+- `pageSize`: Results per page (default: 20)
+
 ## Best Practices
 
 ### Search Strategy
@@ -120,17 +205,37 @@ Find all high priority bugs in the "Mobile App" project created this week
 ### Task Management
 1. Check personal assignments: `my_assigned_issues`
 2. Get issue details: `get_issue_detail` for specific items
-3. Create follow-up tasks: `create_issue` for new work
+3. Update issue status: `update_issue` to change progress
+4. Add progress comments: `create_comment` to document work
+5. Create follow-up tasks: `create_issue` for new work
 
 ### Project Planning
 1. List available projects: `list_project`
 2. Search existing issues: `search_all_issues` with project filter
-3. Create new issues: `create_issue` for planned work
+3. Review team members: `list_project_members` for assignments
+4. Create new issues: `create_issue` for planned work
+5. Set up issue fields: `get_issue_options` to see available values
 
-### Status Updates
+### Status Updates and Communication
 1. Search recent activity: `search_all_issues` with date filters
 2. Check personal work: `my_assigned_issues` with status filters
 3. Get detailed context: `get_issue_detail` for specific updates
+4. Review discussions: `list_issue_comments` to see conversations
+5. Add updates: `create_comment` to document progress
+6. Update issue fields: `update_issue` to reflect current status
+
+### Issue Investigation and Resolution
+1. Get issue details: `get_issue_detail` for full context
+2. Review comment history: `list_issue_comments` for background
+3. Check available options: `get_issue_options` for field values
+4. Update issue status: `update_issue` with resolution
+5. Document resolution: `create_comment` with solution details
+
+### Team Collaboration
+1. Find team members: `list_project_members` or `list_org_members`
+2. Assign issues: `update_issue` with assignee names
+3. Add collaborators: `update_issue` with follower names
+4. Communicate updates: `create_comment` for team visibility
 
 ## Integration Tips
 

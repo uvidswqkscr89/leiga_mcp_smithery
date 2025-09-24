@@ -12,9 +12,9 @@ export interface IssueDataWrapper {
   url: string;
 }
 
-export interface PageDataWrapper {
+export interface PageDataWrapper<T> {
   total: number;
-  list: IssueData[];
+  list: T[];
 }
 
 export interface IssueData {
@@ -107,4 +107,14 @@ export interface ProjectNameVO {
   pname: string;
   pkey: string;
   archived: number;
+}
+
+export interface StringResponse {
+  success?: boolean;
+}
+
+export interface MemberVO {
+  orgEmail?: string;
+  userId?: number;
+  userName?: string;
 }

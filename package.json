@@ -1,6 +1,6 @@
 {
 	"name": "leiga-mcp-smithery",
-	"version": "1.0.0",
+	"version": "1.0.6",
 	"description": "A Model Context Protocol server for the Leiga project management platform, deployed on Smithery",
 	"main": "index.js",
 	"module": "./src/index.ts",

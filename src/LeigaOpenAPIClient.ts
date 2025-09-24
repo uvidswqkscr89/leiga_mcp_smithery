@@ -5,11 +5,14 @@
 import { writeFileSync, readFileSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
-import { TokenData, IssueListResponse, SearchIssueDTO, CreateIssueDTO } from './types.js';
+import { TokenData, IssueListResponse, SearchIssueDTO, CreateIssueDTO, CommentListData, CreateCommentDTO, CreateCommentResponse, ProjectMemberListDTO, OrgMemberListDTO, ApiCustomFieldVO, UpdateIssueDTO } from './types.js';
 import {
   IssueDataWrapper,
   LeigaResponse,
-  ProjectNameVO
+  MemberVO,
+  PageDataWrapper,
+  ProjectNameVO,
+  StringResponse
 } from './type/IssueDetail.js'
 
 class LeigaOpenAPIClient {
@@ -240,6 +243,65 @@ class LeigaOpenAPIClient {
 
   getIssueUrl(issueId: number, projectId: number) {
     return `${this.host}/work/list?pid=${projectId}&issueid=${issueId}`;
+  }
+
+  async getIssueComments(issueId: string, pageNumber?: number, pageSize?: number): Promise<LeigaResponse<CommentListData>> {
+    const linkId = await this.resolveIssueId(issueId);
+    return await this.request<LeigaResponse<CommentListData>>("/comment/list", {
+      method: "POST",
+      body: JSON.stringify({
+        commentModule: "issue",
+        linkId,
+        pageNumber: pageNumber ?? 1,
+        pageSize: pageSize ?? 20
+      })
+    });
+  }
+
+  async createComment(args: CreateCommentDTO): Promise<LeigaResponse<CreateCommentResponse>> {
+    return await this.request<LeigaResponse<CreateCommentResponse>>("/comment/create", {
+      method: "POST",
+      body: JSON.stringify(args)
+    });
+  }
+
+  async resolveIssueId(issueIdOrNumber: string): Promise<number> {
+    const type = this.checkStringType(issueIdOrNumber);
+    switch (type) {
+      case 'id':
+        return parseInt(issueIdOrNumber, 10);
+      case 'number':
+        const response = await this.request<LeigaResponse<IssueDataWrapper>>("/issue/get-by-issue-number", { method: "GET" }, { "issueNumber": issueIdOrNumber });
+        return response.data.id;
+      default:
+        throw new Error('Invalid issueId format');
+    }
+  }
+
+  async listProjectMembers(args: ProjectMemberListDTO): Promise<LeigaResponse<PageDataWrapper<MemberVO>>> {
+    return await this.request<LeigaResponse<PageDataWrapper<MemberVO>>>("/project/member/list", {
+      method: "POST",
+      body: JSON.stringify(args)
+    });
+  }
+
+  async listOrgMembers(args: OrgMemberListDTO): Promise<LeigaResponse<PageDataWrapper<MemberVO>>> {
+    return await this.request<LeigaResponse<PageDataWrapper<MemberVO>>>("/org/member/list", {
+      method: "POST",
+      body: JSON.stringify(args)
+    });
+  }
+
+  async getIssueOptions(issueIdOrNumber: string): Promise<LeigaResponse<ApiCustomFieldVO[]>> {
+    const linkId = await this.resolveIssueId(issueIdOrNumber);
+    return await this.request<LeigaResponse<ApiCustomFieldVO[]>>("/issue/options", { method: "GET" }, { "issueId": linkId.toString() });
+  }
+
+  async updateIssue(args: UpdateIssueDTO): Promise<LeigaResponse<StringResponse>> {
+    return await this.request<LeigaResponse<StringResponse>>("/issue/update", {
+      method: "POST",
+      body: JSON.stringify(args)
+    });
   }
 }
 
