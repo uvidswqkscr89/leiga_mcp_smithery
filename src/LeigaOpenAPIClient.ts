@@ -231,6 +231,27 @@ class LeigaOpenAPIClient {
     return response;
   }
 
+  /**
+   * Get comments for an issue (supports issue ID or issue number)
+   */
+  async getIssueComments(
+    issueIdOrNumber: string,
+    pageNumber: number = 1,
+    pageSize: number = 20
+  ): Promise<LeigaResponse<CommentListData>> {
+    const linkId = await this.resolveIssueId(issueIdOrNumber);
+
+    return await this.request<LeigaResponse<CommentListData>>("/comment/page", {
+      method: "POST",
+      body: JSON.stringify({
+        commentModule: "issue",
+        linkId,
+        pageNumber,
+        pageSize
+      })
+    });
+  }
+
   checkStringType(str: string): "id" | "number" | "other" {
     if (/^\d+$/.test(str)) {
       return "id";
@@ -245,62 +266,77 @@ class LeigaOpenAPIClient {
     return `${this.host}/work/list?pid=${projectId}&issueid=${issueId}`;
   }
 
-  async getIssueComments(issueId: string, pageNumber?: number, pageSize?: number): Promise<LeigaResponse<CommentListData>> {
-    const linkId = await this.resolveIssueId(issueId);
-    return await this.request<LeigaResponse<CommentListData>>("/comment/list", {
+  /**
+   * Create a comment for an issue
+   */
+  async createComment(comment: CreateCommentDTO): Promise<LeigaResponse<CreateCommentResponse>> {
+    return await this.request<LeigaResponse<CreateCommentResponse>>("/comment/add", {
       method: "POST",
-      body: JSON.stringify({
-        commentModule: "issue",
-        linkId,
-        pageNumber: pageNumber ?? 1,
-        pageSize: pageSize ?? 20
-      })
+      body: JSON.stringify(comment)
     });
   }
 
-  async createComment(args: CreateCommentDTO): Promise<LeigaResponse<CreateCommentResponse>> {
-    return await this.request<LeigaResponse<CreateCommentResponse>>("/comment/create", {
-      method: "POST",
-      body: JSON.stringify(args)
-    });
-  }
-
+  /**
+   * Resolve issue ID from string (numeric ID or issue number)
+   * @param issueIdOrNumber - Issue ID or issue number (e.g., "12345" or "ABC-678")
+   * @returns Promise<number> - Resolved numeric issue ID
+   */
   async resolveIssueId(issueIdOrNumber: string): Promise<number> {
     const type = this.checkStringType(issueIdOrNumber);
-    switch (type) {
-      case 'id':
-        return parseInt(issueIdOrNumber, 10);
-      case 'number':
-        const response = await this.request<LeigaResponse<IssueDataWrapper>>("/issue/get-by-issue-number", { method: "GET" }, { "issueNumber": issueIdOrNumber });
-        return response.data.id;
-      default:
-        throw new Error('Invalid issueId format');
+    if (type === 'id') {
+      return Number(issueIdOrNumber);
+    } else if (type === 'number') {
+      const issue = await this.getIssueDeail(issueIdOrNumber);
+      return issue.data.id;
+    } else {
+      throw new Error('Invalid issue identifier. Use numeric ID or issue number like ABC-123');
     }
   }
 
-  async listProjectMembers(args: ProjectMemberListDTO): Promise<LeigaResponse<PageDataWrapper<MemberVO>>> {
-    return await this.request<LeigaResponse<PageDataWrapper<MemberVO>>>("/project/member/list", {
-      method: "POST",
-      body: JSON.stringify(args)
-    });
+  /**
+   * list project members
+   * @param query 
+   * @returns 
+   */
+  async listProjectMembers(query: ProjectMemberListDTO): Promise<LeigaResponse<PageDataWrapper<MemberVO[]>>> {
+    return await this.request<LeigaResponse<PageDataWrapper<MemberVO[]>>>("/user/project-user-page", {
+      method: "GET"
+    }, query);
   }
 
-  async listOrgMembers(args: OrgMemberListDTO): Promise<LeigaResponse<PageDataWrapper<MemberVO>>> {
-    return await this.request<LeigaResponse<PageDataWrapper<MemberVO>>>("/org/member/list", {
-      method: "POST",
-      body: JSON.stringify(args)
-    });
+  /**
+   * list org members
+   * @param query 
+   * @returns 
+   */
+  async listOrgMembers(query: OrgMemberListDTO): Promise<LeigaResponse<PageDataWrapper<MemberVO[]>>> {
+    return await this.request<LeigaResponse<PageDataWrapper<MemberVO[]>>>("/org/all-member-list", {
+      method: "GET"
+    }, query);
   }
 
+  /**
+   * get issue options
+   * @param issueIdOrNumber 
+   * @returns 
+   */
   async getIssueOptions(issueIdOrNumber: string): Promise<LeigaResponse<ApiCustomFieldVO[]>> {
-    const linkId = await this.resolveIssueId(issueIdOrNumber);
-    return await this.request<LeigaResponse<ApiCustomFieldVO[]>>("/issue/options", { method: "GET" }, { "issueId": linkId.toString() });
+    const issueId = await this.resolveIssueId(issueIdOrNumber);
+    return await this.request<LeigaResponse<ApiCustomFieldVO[]>>("/issue/mcp-issue-select-options", {
+      method: "POST",
+      body: JSON.stringify({ id: issueId})
+    });
   }
 
-  async updateIssue(args: UpdateIssueDTO): Promise<LeigaResponse<StringResponse>> {
+  /**
+   * update issue
+   * @param issue 
+   * @returns 
+   */
+  async updateIssue(issue: UpdateIssueDTO): Promise<LeigaResponse<StringResponse>> {
     return await this.request<LeigaResponse<StringResponse>>("/issue/update", {
-      method: "POST",
-      body: JSON.stringify(args)
+      method: "PATCH",
+      body: JSON.stringify(issue)
     });
   }
 }
